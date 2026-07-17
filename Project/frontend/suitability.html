@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OptiCrop - Suitability Analysis</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.2/font/bootstrap-icons.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="index.html"><i class="bi bi-tree-fill"></i> OptiCrop</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"><span class="navbar-toggler-icon"></span></button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="index.html"><i class="bi bi-house-fill"></i> Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="recommend.html"><i class="bi bi-flower1"></i> Recommend</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="suitability.html"><i class="bi bi-check-circle"></i> Suitability</a></li>
+                    <li class="nav-item"><a class="nav-link" href="dashboard.html"><i class="bi bi-bar-chart-fill"></i> Dashboard</a></li>
+                    <li class="nav-item"><a class="nav-link" href="about.html"><i class="bi bi-info-circle-fill"></i> About</a></li>
+                    <li class="nav-item"><a class="nav-link" href="contact.html"><i class="bi bi-envelope-fill"></i> Contact</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <main>
+        <section class="page-header">
+            <div class="container">
+                <h1>Suitability Assessment</h1>
+                <p>Evaluate whether current conditions are suitable for crop growth</p>
+            </div>
+        </section>
+
+        <section class="form-section">
+            <div class="container">
+                <div class="row justify-content-center">
+                    <div class="col-lg-8">
+                        <div id="errorAlert" class="alert alert-danger alert-dismissible fade show d-none" role="alert">
+                            <i class="bi bi-exclamation-triangle-fill"></i> <span id="errorText"></span>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+
+                        <div class="card form-card" id="formCard">
+                            <div class="card-body">
+                                <h3><i class="bi bi-input-cursor"></i> Enter Conditions for Analysis</h3>
+                                <form id="suitabilityForm" class="row g-4">
+                                    <div class="col-md-6">
+                                        <label class="form-label">Nitrogen (N) <span class="text-danger">*</span></label>
+                                        <input type="number" step="0.01" class="form-control" name="nitrogen" placeholder="e.g., 90" required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Phosphorous (P) <span class="text-danger">*</span></label>
+                                        <input type="number" step="0.01" class="form-control" name="phosphorous" placeholder="e.g., 42" required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Potassium (K) <span class="text-danger">*</span></label>
+                                        <input type="number" step="0.01" class="form-control" name="potassium" placeholder="e.g., 43" required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Temperature (°C) <span class="text-danger">*</span></label>
+                                        <input type="number" step="0.01" class="form-control" name="temperature" placeholder="e.g., 25.5" required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Humidity (%) <span class="text-danger">*</span></label>
+                                        <input type="number" step="0.01" class="form-control" name="humidity" placeholder="e.g., 82" required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">pH Level <span class="text-danger">*</span></label>
+                                        <input type="number" step="0.01" class="form-control" name="ph" placeholder="e.g., 6.5" required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Rainfall (mm) <span class="text-danger">*</span></label>
+                                        <input type="number" step="0.01" class="form-control" name="rainfall" placeholder="e.g., 120" required>
+                                    </div>
+                                    <div class="col-12 text-center">
+                                        <button type="submit" id="analyzeBtn" class="btn btn-success btn-lg px-5">
+                                            <i class="bi bi-check-circle"></i> Analyze Suitability
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+
+                        <div id="resultContainer" class="d-none">
+                            <div class="assessment-results mt-5">
+                                <h3 class="text-center mb-4"><i class="bi bi-clipboard-data"></i> Assessment Results</h3>
+
+                                <div class="row mb-4">
+                                    <div class="col-md-4">
+                                        <div class="card status-card text-white" id="statusCard">
+                                            <div class="card-body text-center">
+                                                <h5>Suitability Status</h5>
+                                                <h3 id="suitabilityStatus"></h3>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="card status-card bg-info text-white">
+                                            <div class="card-body text-center">
+                                                <h5>Predicted Crop</h5>
+                                                <h3 id="predictedCrop"></h3>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="card status-card bg-primary text-white">
+                                            <div class="card-body text-center">
+                                                <h5>Productivity</h5>
+                                                <h3 id="productivityLevel"></h3>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="card mb-4">
+                                    <div class="card-body">
+                                        <h4><i class="bi bi-globe"></i> Environmental Compatibility</h4>
+                                        <div class="row mt-3" id="compatibilityContainer"></div>
+                                    </div>
+                                </div>
+
+                                <div class="card mb-4">
+                                    <div class="card-body">
+                                        <h4><i class="bi bi-tree"></i> Soil Analysis</h4>
+                                        <ul class="list-group list-group-flush mt-3" id="soilAnalysisList"></ul>
+                                    </div>
+                                </div>
+
+                                <div class="row mb-4">
+                                    <div class="col-md-6">
+                                        <div class="card h-100">
+                                            <div class="card-body">
+                                                <h5><i class="bi bi-cloud-rain"></i> Rainfall Analysis</h5>
+                                                <p id="rainfallAnalysis"></p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="card h-100">
+                                            <div class="card-body">
+                                                <h5><i class="bi bi-thermometer-half"></i> Temperature Analysis</h5>
+                                                <p id="temperatureAnalysis"></p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="card recommendation-card">
+                                    <div class="card-body">
+                                        <h4><i class="bi bi-lightbulb-fill"></i> Agricultural Recommendation</h4>
+                                        <p class="fs-5" id="recommendationText"></p>
+                                    </div>
+                                </div>
+
+                                <div class="text-center mt-4">
+                                    <button onclick="resetForm()" class="btn btn-outline-success">
+                                        <i class="bi bi-arrow-left"></i> New Analysis
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <h5><i class="bi bi-tree-fill"></i> OptiCrop</h5>
+                    <p>Smart Agricultural Production Optimization Engine powered by Machine Learning.</p>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <h5>Quick Links</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="recommend.html">Crop Recommendation</a></li>
+                        <li><a href="suitability.html">Suitability Analysis</a></li>
+                        <li><a href="dashboard.html">Research Dashboard</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <h5>Contact</h5>
+                    <ul class="list-unstyled">
+                        <li><i class="bi bi-envelope"></i> contact@opticrop.ai</li>
+                        <li><i class="bi bi-geo-alt"></i> Agricultural Research Center</li>
+                        <li><i class="bi bi-telephone"></i> +91 9876543210</li>
+                    </ul>
+                </div>
+            </div>
+            <hr>
+            <div class="text-center">
+                <p>&copy; 2026 OptiCrop. All rights reserved. | Smart Agriculture for a Sustainable Future</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/script.js"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+    var API_BASE = window.API_BASE || "http://127.0.0.1:5000";
+
+    var form = document.getElementById('suitabilityForm');
+    if (!form) return;
+
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        var btn = document.getElementById('analyzeBtn');
+        if (!btn) return;
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status"></span> Analyzing...';
+
+        var formData = {
+            nitrogen: parseFloat(this.nitrogen.value),
+            phosphorous: parseFloat(this.phosphorous.value),
+            potassium: parseFloat(this.potassium.value),
+            temperature: parseFloat(this.temperature.value),
+            humidity: parseFloat(this.humidity.value),
+            ph: parseFloat(this.ph.value),
+            rainfall: parseFloat(this.rainfall.value)
+        };
+
+        var errAlert = document.getElementById('errorAlert');
+        if (errAlert) errAlert.classList.add('d-none');
+
+        fetch(API_BASE + '/api/suitability', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(formData)
+        })
+        .then(function(res) { return res.json(); })
+        .then(function(data) {
+            if (data.error) {
+                showError(data.error);
+                return;
+            }
+            document.getElementById('formCard').classList.add('d-none');
+            document.getElementById('resultContainer').classList.remove('d-none');
+
+            var crop = data.crop.charAt(0).toUpperCase() + data.crop.slice(1);
+            document.getElementById('predictedCrop').textContent = crop;
+
+            var sc = document.getElementById('statusCard');
+            if (data.suitability_status === 'Optimal') {
+                sc.className = 'card status-card bg-success text-white';
+            } else if (data.suitability_status === 'Moderate') {
+                sc.className = 'card status-card bg-warning text-white';
+            } else {
+                sc.className = 'card status-card bg-danger text-white';
+            }
+            document.getElementById('suitabilityStatus').textContent = data.suitability_status;
+            document.getElementById('productivityLevel').textContent = data.productivity_level;
+
+            var compatHtml = '';
+            for (var factor in data.environmental_compatibility) {
+                var status = data.environmental_compatibility[factor];
+                var compatClass = status === 'Compatible' ? 'compat-ok' : 'compat-warn';
+                var badgeClass = status === 'Compatible' ? 'bg-success' : 'bg-warning text-dark';
+                compatHtml += '<div class="col-md-3 mb-3">' +
+                    '<div class="compat-box ' + compatClass + '">' +
+                    '<h6>' + factor + '</h6>' +
+                    '<span class="badge ' + badgeClass + '">' + status + '</span>' +
+                    '</div></div>';
+            }
+            document.getElementById('compatibilityContainer').innerHTML = compatHtml;
+
+            var soilHtml = '';
+            for (var i = 0; i < data.soil_analysis.length; i++) {
+                var item = data.soil_analysis[i];
+                var icon = item.indexOf('Optimal') !== -1 ? 'bi-check-circle-fill text-success' : 'bi-exclamation-triangle-fill text-warning';
+                soilHtml += '<li class="list-group-item"><i class="bi ' + icon + '"></i> ' + item + '</li>';
+            }
+            document.getElementById('soilAnalysisList').innerHTML = soilHtml;
+
+            document.getElementById('rainfallAnalysis').textContent = data.rainfall_analysis;
+            document.getElementById('temperatureAnalysis').textContent = data.temperature_analysis;
+            document.getElementById('recommendationText').textContent = data.recommendation;
+        })
+        .catch(function(err) {
+            showError('Failed to connect to the server. Please ensure the backend is running.');
+        })
+        .finally(function() {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="bi bi-check-circle"></i> Analyze Suitability';
+        });
+    });
+
+    function showError(msg) {
+        var et = document.getElementById('errorText');
+        var ea = document.getElementById('errorAlert');
+        if (et) et.textContent = msg;
+        if (ea) ea.classList.remove('d-none');
+    }
+
+    function resetForm() {
+        var fc = document.getElementById('formCard');
+        var rc = document.getElementById('resultContainer');
+        var sf = document.getElementById('suitabilityForm');
+        if (fc) fc.classList.remove('d-none');
+        if (rc) rc.classList.add('d-none');
+        if (sf) sf.reset();
+        window.scrollTo(0, 0);
+    }
+    });
+    </script>
+</body>
+</html>

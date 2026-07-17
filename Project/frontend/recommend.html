@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OptiCrop - Crop Recommendation</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.2/font/bootstrap-icons.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="index.html"><i class="bi bi-tree-fill"></i> OptiCrop</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"><span class="navbar-toggler-icon"></span></button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="index.html"><i class="bi bi-house-fill"></i> Home</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="recommend.html"><i class="bi bi-flower1"></i> Recommend</a></li>
+                    <li class="nav-item"><a class="nav-link" href="suitability.html"><i class="bi bi-check-circle"></i> Suitability</a></li>
+                    <li class="nav-item"><a class="nav-link" href="dashboard.html"><i class="bi bi-bar-chart-fill"></i> Dashboard</a></li>
+                    <li class="nav-item"><a class="nav-link" href="about.html"><i class="bi bi-info-circle-fill"></i> About</a></li>
+                    <li class="nav-item"><a class="nav-link" href="contact.html"><i class="bi bi-envelope-fill"></i> Contact</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <main>
+        <section class="page-header">
+            <div class="container">
+                <h1>Crop Recommendation</h1>
+                <p>Enter your soil and environmental conditions to get the best crop recommendation</p>
+            </div>
+        </section>
+
+        <section class="form-section">
+            <div class="container">
+                <div class="row justify-content-center">
+                    <div class="col-lg-8">
+                        <div id="errorAlert" class="alert alert-danger alert-dismissible fade show d-none" role="alert">
+                            <i class="bi bi-exclamation-triangle-fill"></i> <span id="errorText"></span>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+
+                        <div class="card form-card" id="formCard">
+                            <div class="card-body">
+                                <h3><i class="bi bi-input-cursor"></i> Enter Conditions</h3>
+                                <form id="recommendForm" class="row g-4">
+                                    <div class="col-md-6">
+                                        <label class="form-label">Nitrogen (N) <span class="text-danger">*</span></label>
+                                        <div class="input-group">
+                                            <span class="input-group-text">N</span>
+                                            <input type="number" step="0.01" class="form-control" name="nitrogen" placeholder="e.g., 90" required>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Phosphorous (P) <span class="text-danger">*</span></label>
+                                        <div class="input-group">
+                                            <span class="input-group-text">P</span>
+                                            <input type="number" step="0.01" class="form-control" name="phosphorous" placeholder="e.g., 42" required>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Potassium (K) <span class="text-danger">*</span></label>
+                                        <div class="input-group">
+                                            <span class="input-group-text">K</span>
+                                            <input type="number" step="0.01" class="form-control" name="potassium" placeholder="e.g., 43" required>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Temperature (°C) <span class="text-danger">*</span></label>
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="bi bi-thermometer-half"></i></span>
+                                            <input type="number" step="0.01" class="form-control" name="temperature" placeholder="e.g., 25.5" required>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Humidity (%) <span class="text-danger">*</span></label>
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="bi bi-droplet-half"></i></span>
+                                            <input type="number" step="0.01" class="form-control" name="humidity" placeholder="e.g., 82" required>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">pH Level <span class="text-danger">*</span></label>
+                                        <div class="input-group">
+                                            <span class="input-group-text">pH</span>
+                                            <input type="number" step="0.01" class="form-control" name="ph" placeholder="e.g., 6.5" required>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Rainfall (mm) <span class="text-danger">*</span></label>
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="bi bi-cloud-rain"></i></span>
+                                            <input type="number" step="0.01" class="form-control" name="rainfall" placeholder="e.g., 120" required>
+                                        </div>
+                                    </div>
+                                    <div class="col-12 text-center">
+                                        <button type="submit" id="predictBtn" class="btn btn-success btn-lg px-5">
+                                            <i class="bi bi-search"></i> Predict Crop
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+
+                        <div id="resultContainer" class="d-none">
+                            <div class="card result-card">
+                                <div class="card-body text-center">
+                                    <div class="result-icon">
+                                        <i class="bi bi-flower1"></i>
+                                    </div>
+                                    <h2 class="result-crop" id="resultCrop"></h2>
+                                    <div class="confidence-badge">
+                                        <span class="badge bg-success fs-5" id="resultConfidence">
+                                            <i class="bi bi-check-circle-fill"></i> Confidence: <span id="confidenceValue"></span>%
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="card detail-card mt-4" id="cropInfoCard">
+                                <div class="card-body">
+                                    <h4><i class="bi bi-info-circle-fill"></i> About <span id="cropName"></span></h4>
+                                    <p id="cropDescription"></p>
+                                    <div class="row mt-4">
+                                        <div class="col-md-4">
+                                            <div class="info-box">
+                                                <i class="bi bi-thermometer-half"></i>
+                                                <h6>Ideal Temperature</h6>
+                                                <p id="idealTemp"></p>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="info-box">
+                                                <i class="bi bi-cloud-rain"></i>
+                                                <h6>Ideal Rainfall</h6>
+                                                <p id="idealRainfall"></p>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="info-box">
+                                                <i class="bi bi-droplet-half"></i>
+                                                <h6>Ideal pH</h6>
+                                                <p id="idealPh"></p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="card tip-card mt-4" id="tipsCard">
+                                <div class="card-body">
+                                    <h4><i class="bi bi-lightbulb-fill"></i> Agricultural Tips</h4>
+                                    <p id="cropTips"></p>
+                                </div>
+                            </div>
+
+                            <div class="text-center mt-4">
+                                <a href="suitability.html" class="btn btn-success me-2">
+                                    <i class="bi bi-check-circle"></i> Check Suitability
+                                </a>
+                                <button onclick="resetForm()" class="btn btn-outline-success">
+                                    <i class="bi bi-arrow-left"></i> New Prediction
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <h5><i class="bi bi-tree-fill"></i> OptiCrop</h5>
+                    <p>Smart Agricultural Production Optimization Engine powered by Machine Learning.</p>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <h5>Quick Links</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="recommend.html">Crop Recommendation</a></li>
+                        <li><a href="suitability.html">Suitability Analysis</a></li>
+                        <li><a href="dashboard.html">Research Dashboard</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <h5>Contact</h5>
+                    <ul class="list-unstyled">
+                        <li><i class="bi bi-envelope"></i> contact@opticrop.ai</li>
+                        <li><i class="bi bi-geo-alt"></i> Agricultural Research Center</li>
+                        <li><i class="bi bi-telephone"></i> +91 9876543210</li>
+                    </ul>
+                </div>
+            </div>
+            <hr>
+            <div class="text-center">
+                <p>&copy; 2026 OptiCrop. All rights reserved. | Smart Agriculture for a Sustainable Future</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/script.js"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+    var API_BASE = window.API_BASE || "http://127.0.0.1:5000";
+
+    var form = document.getElementById('recommendForm');
+    if (!form) return;
+
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        var btn = document.getElementById('predictBtn');
+        if (!btn) return;
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status"></span> Predicting...';
+
+        var formData = {
+            nitrogen: parseFloat(this.nitrogen.value),
+            phosphorous: parseFloat(this.phosphorous.value),
+            potassium: parseFloat(this.potassium.value),
+            temperature: parseFloat(this.temperature.value),
+            humidity: parseFloat(this.humidity.value),
+            ph: parseFloat(this.ph.value),
+            rainfall: parseFloat(this.rainfall.value)
+        };
+
+        var errAlert = document.getElementById('errorAlert');
+        if (errAlert) errAlert.classList.add('d-none');
+
+        fetch(API_BASE + '/api/predict', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(formData)
+        })
+        .then(function(res) { return res.json(); })
+        .then(function(data) {
+            if (data.error) {
+                showError(data.error);
+                return;
+            }
+            document.getElementById('formCard').classList.add('d-none');
+            document.getElementById('resultContainer').classList.remove('d-none');
+
+            document.getElementById('resultCrop').textContent = data.crop.charAt(0).toUpperCase() + data.crop.slice(1);
+            document.getElementById('confidenceValue').textContent = (data.confidence * 100).toFixed(2);
+            document.getElementById('cropName').textContent = data.crop.charAt(0).toUpperCase() + data.crop.slice(1);
+
+            if (data.crop_info) {
+                document.getElementById('cropDescription').textContent = data.crop_info.description || '';
+                document.getElementById('idealTemp').textContent = data.crop_info.ideal_temp || '';
+                document.getElementById('idealRainfall').textContent = data.crop_info.ideal_rainfall || '';
+                document.getElementById('idealPh').textContent = data.crop_info.ideal_ph || '';
+                document.getElementById('cropTips').textContent = data.crop_info.tips || '';
+
+                if (!data.crop_info.tips) {
+                    document.getElementById('tipsCard').classList.add('d-none');
+                } else {
+                    document.getElementById('tipsCard').classList.remove('d-none');
+                }
+            }
+        })
+        .catch(function(err) {
+            showError('Failed to connect to the server. Please ensure the backend is running.');
+        })
+        .finally(function() {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="bi bi-search"></i> Predict Crop';
+        });
+    });
+
+    function showError(msg) {
+        var et = document.getElementById('errorText');
+        var ea = document.getElementById('errorAlert');
+        if (et) et.textContent = msg;
+        if (ea) ea.classList.remove('d-none');
+    }
+
+    function resetForm() {
+        var fc = document.getElementById('formCard');
+        var rc = document.getElementById('resultContainer');
+        var rf = document.getElementById('recommendForm');
+        if (fc) fc.classList.remove('d-none');
+        if (rc) rc.classList.add('d-none');
+        if (rf) rf.reset();
+        window.scrollTo(0, 0);
+    }
+    });
+    </script>
+</body>
+</html>

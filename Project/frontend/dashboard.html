@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OptiCrop - Research Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.2/font/bootstrap-icons.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="index.html"><i class="bi bi-tree-fill"></i> OptiCrop</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"><span class="navbar-toggler-icon"></span></button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="index.html"><i class="bi bi-house-fill"></i> Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="recommend.html"><i class="bi bi-flower1"></i> Recommend</a></li>
+                    <li class="nav-item"><a class="nav-link" href="suitability.html"><i class="bi bi-check-circle"></i> Suitability</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="dashboard.html"><i class="bi bi-bar-chart-fill"></i> Dashboard</a></li>
+                    <li class="nav-item"><a class="nav-link" href="about.html"><i class="bi bi-info-circle-fill"></i> About</a></li>
+                    <li class="nav-item"><a class="nav-link" href="contact.html"><i class="bi bi-envelope-fill"></i> Contact</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <main>
+        <section class="page-header">
+            <div class="container">
+                <h1>Agricultural Research Dashboard</h1>
+                <p>Comprehensive data analysis and model comparison for researchers and policymakers</p>
+            </div>
+        </section>
+
+        <section class="dashboard-section">
+            <div class="container">
+                <div id="loadingSpinner" class="text-center py-5">
+                    <div class="spinner-border text-success" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="mt-2">Loading dashboard data...</p>
+                </div>
+                <div id="dashboardError" class="alert alert-danger d-none">
+                    <i class="bi bi-exclamation-triangle-fill"></i> <span id="errorText"></span>
+                </div>
+                <div id="dashboardContent" class="d-none"></div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <h5><i class="bi bi-tree-fill"></i> OptiCrop</h5>
+                    <p>Smart Agricultural Production Optimization Engine powered by Machine Learning.</p>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <h5>Quick Links</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="recommend.html">Crop Recommendation</a></li>
+                        <li><a href="suitability.html">Suitability Analysis</a></li>
+                        <li><a href="dashboard.html">Research Dashboard</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <h5>Contact</h5>
+                    <ul class="list-unstyled">
+                        <li><i class="bi bi-envelope"></i> contact@opticrop.ai</li>
+                        <li><i class="bi bi-geo-alt"></i> Agricultural Research Center</li>
+                        <li><i class="bi bi-telephone"></i> +91 9876543210</li>
+                    </ul>
+                </div>
+            </div>
+            <hr>
+            <div class="text-center">
+                <p>&copy; 2026 OptiCrop. All rights reserved. | Smart Agriculture for a Sustainable Future</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="js/script.js"></script>
+    <script>
+    var API_BASE = window.API_BASE || "http://127.0.0.1:5000";
+
+    document.addEventListener('DOMContentLoaded', function() {
+        loadDashboard();
+    });
+
+    function loadDashboard() {
+        fetch(API_BASE + '/api/dashboard')
+            .then(function(res) { return res.json(); })
+            .then(function(data) {
+                if (data.error) {
+                    showDashError(data.error);
+                    return;
+                }
+                renderDashboard(data);
+            })
+            .catch(function(err) {
+                showDashError('Failed to connect to the backend server.');
+            });
+    }
+
+    function showDashError(msg) {
+        document.getElementById('loadingSpinner').classList.add('d-none');
+        document.getElementById('dashboardError').classList.remove('d-none');
+        document.getElementById('errorText').textContent = msg;
+    }
+
+    function renderDashboard(data) {
+        document.getElementById('loadingSpinner').classList.add('d-none');
+        var container = document.getElementById('dashboardContent');
+        container.classList.remove('d-none');
+
+        var html = '';
+        var metrics = data.metrics;
+        var stats = data.stats;
+        var charts = data.charts;
+        var modelNames = [], accuracyData = [], precisionData = [], recallData = [], f1Data = [];
+
+        if (metrics) {
+            var best = metrics.best_model;
+            var bestData = metrics[best] || {};
+
+            html += '<div class="row g-3 mb-4">' +
+                summaryCard('bi-flower1', 'Total Crops', (stats && stats.total_crops) || '-') +
+                summaryCard('bi-table', 'Total Records', (stats && stats.total_records) || '-') +
+                summaryCard('bi-cpu', 'Best Model', '<h6 class="model-name" style="font-size:0.85rem;color:var(--primary);font-weight:700;margin-top:0.3rem;">' + (best || '') + '</h6>') +
+                summaryCard('bi-check-circle', 'Best Accuracy', (bestData.accuracy ? (bestData.accuracy * 100).toFixed(1) + '%' : '-')) +
+                summaryCard('bi-thermometer-half', 'Avg Temperature', (stats ? stats.avg_temperature + '\u00B0C' : '-')) +
+                summaryCard('bi-cloud-rain', 'Avg Rainfall', (stats ? stats.avg_rainfall + ' mm' : '-')) +
+                '</div>';
+
+            html += '<div class="row mb-4"><div class="col-12"><div class="card"><div class="card-body">' +
+                '<h4><i class="bi bi-bar-chart-fill"></i> Model Performance Comparison</h4>' +
+                '<div class="table-responsive mt-3"><table class="table table-hover model-table align-middle"><thead><tr>' +
+                '<th>Model</th><th>Accuracy</th><th>Precision</th><th>Recall</th><th>F1-Score</th><th>CV Mean</th><th>CV Std</th>' +
+                '</tr></thead><tbody>';
+
+            for (var key in metrics) {
+                if (key === 'best_model' || key === 'kmeans') continue;
+                var d = metrics[key];
+                var isBest = (key === best);
+                var rowClass = isBest ? 'table-success best-row' : '';
+                var badge = isBest ? ' <span class="badge bg-success ms-1"><i class="bi bi-trophy-fill"></i> Best</span>' : '';
+                html += '<tr class="' + rowClass + '">' +
+                    '<td><strong>' + key + '</strong>' + badge + '</td>' +
+                    '<td class="' + (isBest ? 'fw-bold' : '') + '">' + (d.accuracy * 100).toFixed(2) + '%</td>' +
+                    '<td>' + (d.precision * 100).toFixed(2) + '%</td>' +
+                    '<td>' + (d.recall * 100).toFixed(2) + '%</td>' +
+                    '<td>' + (d.f1_score * 100).toFixed(2) + '%</td>' +
+                    '<td>' + (d.cv_mean * 100).toFixed(2) + '%</td>' +
+                    '<td>\u00B1 ' + (d.cv_std * 100).toFixed(2) + '%</td></tr>';
+
+                modelNames.push(key);
+                accuracyData.push((d.accuracy * 100).toFixed(1));
+                precisionData.push((d.precision * 100).toFixed(1));
+                recallData.push((d.recall * 100).toFixed(1));
+                f1Data.push((d.f1_score * 100).toFixed(1));
+            }
+
+            html += '</tbody></table></div></div></div></div></div>';
+
+            html += '<div class="row mb-4"><div class="col-12"><div class="card"><div class="card-body">' +
+                '<h4><i class="bi bi-bar-chart"></i> Model Comparison Chart</h4>' +
+                '<div class="chart-container"><canvas id="modelComparisonChart"></canvas></div>' +
+                '</div></div></div></div>';
+        }
+
+        if (stats) {
+            html += '<div class="row g-4 mb-4">' +
+                '<div class="col-md-6"><div class="card h-100"><div class="card-body">' +
+                '<h5><i class="bi bi-info-circle"></i> Dataset Statistics</h5>' +
+                '<table class="table table-sm mt-3"><tbody>' +
+                '<tr><td>Total Records</td><td class="fw-bold">' + (stats.total_records || '-') + '</td></tr>' +
+                '<tr><td>Crop Classes</td><td class="fw-bold">' + (stats.total_crops || '-') + '</td></tr>' +
+                '<tr><td>Most Frequent Crop</td><td class="fw-bold">' + (stats.most_frequent_crop || '-') + '</td></tr>' +
+                '<tr><td>Features</td><td class="fw-bold">' + ((stats.features || []).join(', ')) + '</td></tr>' +
+                '</tbody></table></div></div></div>' +
+                '<div class="col-md-6"><div class="card h-100"><div class="card-body">' +
+                '<h5><i class="bi bi-droplet"></i> Environmental Summary</h5>' +
+                '<table class="table table-sm mt-3"><tbody>' +
+                '<tr><td>Avg Temperature</td><td class="fw-bold">' + (stats.avg_temperature || '-') + '\u00B0C</td><td>Range</td><td>' + (stats.min_temp || '-') + '\u00B0C \u2013 ' + (stats.max_temp || '-') + '\u00B0C</td></tr>' +
+                '<tr><td>Avg Humidity</td><td class="fw-bold">' + (stats.avg_humidity || '-') + '%</td><td></td><td></td></tr>' +
+                '<tr><td>Avg Rainfall</td><td class="fw-bold">' + (stats.avg_rainfall || '-') + ' mm</td><td>Range</td><td>' + (stats.min_rainfall || '-') + ' \u2013 ' + (stats.max_rainfall || '-') + ' mm</td></tr>' +
+                '<tr><td>Avg pH</td><td class="fw-bold">' + (stats.avg_ph || '-') + '</td><td></td><td></td></tr>' +
+                '<tr><td>Avg N / P / K</td><td class="fw-bold">' + (stats.avg_n || '-') + ' / ' + (stats.avg_p || '-') + ' / ' + (stats.avg_k || '-') + '</td><td></td><td></td></tr>' +
+                '</tbody></table></div></div></div></div>';
+
+            if (stats.top_correlations && stats.top_correlations.length > 0) {
+                html += '<div class="row mb-4"><div class="col-12"><div class="card"><div class="card-body">' +
+                    '<h5><i class="bi bi-link-45deg"></i> Feature Correlation Insights</h5>' +
+                    '<p class="text-muted">Top 5 strongest feature correlations in the dataset:</p>' +
+                    '<div class="table-responsive"><table class="table table-sm"><thead><tr><th>Feature Pair</th><th>Correlation</th><th>Strength</th></tr></thead><tbody>';
+                for (var ci = 0; ci < stats.top_correlations.length; ci++) {
+                    var c = stats.top_correlations[ci];
+                    var absVal = Math.abs(c.value);
+                    var badge = absVal >= 0.7 ? 'bg-success' : (absVal >= 0.4 ? 'bg-warning text-dark' : 'bg-secondary');
+                    var strength = absVal >= 0.7 ? 'Strong' : (absVal >= 0.4 ? 'Moderate' : 'Weak');
+                    html += '<tr><td>' + c.pair + '</td><td class="fw-bold">' + c.value.toFixed(3) + '</td>' +
+                        '<td><span class="badge ' + badge + '">' + strength + '</span></td></tr>';
+                }
+                html += '</tbody></table></div></div></div></div></div>';
+            }
+
+            if (metrics && metrics.kmeans) {
+                var km = metrics.kmeans;
+                html += '<div class="row mb-4"><div class="col-12"><div class="card border-warning"><div class="card-body">' +
+                    '<h5><i class="bi bi-diagram-3"></i> K-Means Cluster Analysis <span class="badge bg-warning text-dark ms-2">For Exploratory Use Only</span></h5>' +
+                    '<p class="text-muted">Unsupervised learning applied to the dataset for discovering natural groupings. <strong>Not used for crop prediction</strong> \u2014 the supervised Random Forest classifier handles that.</p>' +
+                    '<div class="row g-3">' +
+                    '<div class="col-md-3"><div class="border rounded p-3 text-center h-100"><div class="text-muted small">Number of Clusters</div><div class="fs-4 fw-bold">' + km.n_clusters + '</div></div></div>' +
+                    '<div class="col-md-3"><div class="border rounded p-3 text-center h-100"><div class="text-muted small">Inertia</div><div class="fs-4 fw-bold">' + Math.round(km.inertia) + '</div></div></div>' +
+                    '<div class="col-md-3"><div class="border rounded p-3 text-center h-100"><div class="text-muted small">PCA Explained Variance (2D)</div><div class="fs-4 fw-bold">' + (km.pca_explained_variance * 100).toFixed(1) + '%</div></div></div>' +
+                    '<div class="col-md-3"><div class="border rounded p-3 text-center h-100"><div class="text-muted small">Features Used</div><div class="fs-4 fw-bold">' + km.n_features + '</div></div></div>' +
+                    '</div></div></div></div></div>';
+            }
+        }
+
+        if (charts && Object.keys(charts).length > 0) {
+            var chartList = [
+                { key: 'crop_distribution', icon: 'bi-pie-chart-fill', label: 'Crop Distribution' },
+                { key: 'npk_distribution', icon: 'bi-bar-chart-fill', label: 'NPK Nutrient Distribution' },
+                { key: 'temperature_distribution', icon: 'bi-thermometer-half', label: 'Temperature Distribution' },
+                { key: 'humidity_distribution', icon: 'bi-droplet-half', label: 'Humidity Distribution' },
+                { key: 'rainfall_distribution', icon: 'bi-cloud-rain', label: 'Rainfall Distribution' },
+                { key: 'ph_distribution', icon: 'bi-droplet', label: 'pH Distribution' },
+            ];
+            var fullCharts = [
+                { key: 'correlation_heatmap', icon: 'bi-grid-3x3-gap-fill', label: 'Correlation Matrix Heatmap' },
+                { key: 'boxplots', icon: 'bi-box', label: 'Boxplots by Crop' },
+                { key: 'pairplot', icon: 'bi-diagram-3', label: 'Pairplot of Features' },
+                { key: 'kmeans_clusters', icon: 'bi-diagram-3', label: 'K-Means Clusters (Exploratory)' },
+            ];
+
+            html += '<div class="row g-4">';
+            for (var i = 0; i < chartList.length; i++) {
+                html += chartCard(chartList[i], charts, false);
+            }
+            html += '</div><div class="row g-4 mt-2">';
+            for (var i = 0; i < fullCharts.length; i++) {
+                html += chartCard(fullCharts[i], charts, true);
+            }
+            html += '</div>';
+        } else {
+            html += '<div class="alert alert-info"><i class="bi bi-info-circle-fill"></i> Charts are being generated. Please refresh the page in a moment.</div>';
+        }
+
+        container.innerHTML = html;
+        if (modelNames.length) {
+            renderChart(modelNames, accuracyData, precisionData, recallData, f1Data);
+        }
+    }
+
+    function summaryCard(icon, label, value) {
+        return '<div class="col-md-4 col-lg-2"><div class="card summary-card h-100"><div class="card-body text-center">' +
+            '<div class="summary-icon"><i class="bi ' + icon + '"></i></div>' +
+            '<h6>' + label + '</h6>' +
+            '<h3>' + value + '</h3></div></div></div>';
+    }
+
+    function chartCard(item, charts, fullWidth) {
+        var colClass = fullWidth ? 'col-12' : 'col-md-6';
+        var relPath = charts[item.key];
+        var imgSrc = relPath ? API_BASE + relPath : ('images/' + item.key + '.png');
+        return '<div class="' + colClass + '"><div class="card chart-card h-100"><div class="card-body">' +
+            '<h5><i class="bi ' + item.icon + '"></i> ' + item.label + '</h5>' +
+            '<img src="' + imgSrc + '" alt="' + item.label + '" class="img-fluid chart-img" ' +
+            'onerror="this.parentElement.innerHTML=\'<div class=\\\'chart-placeholder\\\'><i class=\\\'bi bi-image\\\'></i><p>Chart unavailable</p></div>\'">' +
+            '</div></div></div>';
+    }
+
+    function renderChart(labels, accuracy, precision, recall, f1) {
+        var canvas = document.getElementById('modelComparisonChart');
+        if (!canvas) return;
+        var ctx = canvas.getContext('2d');
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [
+                    { label: 'Accuracy', data: accuracy, backgroundColor: '#4CAF50' },
+                    { label: 'Precision', data: precision, backgroundColor: '#2196F3' },
+                    { label: 'Recall', data: recall, backgroundColor: '#FF9800' },
+                    { label: 'F1-Score', data: f1, backgroundColor: '#9C27B0' }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'top' },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return context.dataset.label + ': ' + context.parsed.y + '%';
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 100,
+                        title: { display: true, text: 'Percentage (%)' }
+                    }
+                }
+            }
+        });
+    }
+    </script>
+</body>
+</html>
